@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+
+
+X = "x"
+Y = "y"
+R = "r"  # rotation
+
+XY = (X, Y)
+XYR = (X, Y, R)
+
+TIME_TO_UPDATE_SPEED_ML = 1000
+CHANGE_SPEED_PER_UPDATE = dict()
+DIMENSION = 2
+
+CHANGE_SPEED_PER_UPDATE[X] = 3
+CHANGE_SPEED_PER_UPDATE[Y] = 3
+CHANGE_SPEED_PER_UPDATE[R] = 20
+
+MAX_SPEED = dict()
+MIN_SPEED = dict()
+
+MAX_SPEED[X] = 15
+MAX_SPEED[Y] = 15
+MAX_SPEED[R] = 10
+
+MIN_SPEED[X] = -15
+MIN_SPEED[Y] = -15
+MIN_SPEED[R] = -10
