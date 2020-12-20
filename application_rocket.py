@@ -75,11 +75,11 @@ class Application(object):
                 self.r_ui.alert(messages.ERROR, messages.CONNECTION_ERROR)
 
     def get_speed_to_send(self):
-        speed = self.r_ui.speed
+        speed = self.r_ui.get_speed()
         if all([speed[param] == 0 for param in parametr.XYR]):
             return
 
-        return model.Message(username=self.username, speed=speed, message="",quit=False)
+        return model.Message(username=self.username, rocket_speed=speed, message="", quit=False)
 
     def send_speed(self, event=None):
         message = self.get_speed_to_send()

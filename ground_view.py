@@ -76,8 +76,8 @@ class GroundUI():
         self.frame.grid(column=2, row=0, columnspan=2, rowspan=4)
         self.input_field = tkinter.Entry(self.gui, textvariable=self.message, width=100)
         self.input_field.grid(column=2, row=5, columnspan=2)
-        # self.input_field.bind(KEY_RETURN, self.application.send)
-        self.send_button = tkinter.Button(self.gui, text=messages.SEND , command=self.application.send)
+        self.input_field.bind(KEY_RETURN, self.application.send)
+        self.send_button = tkinter.Button(self.gui, text=messages.SEND, command=self.application.send)
         self.send_button.grid(column=2, row=6, columnspan=2)
 
     def input_dialogs(self):

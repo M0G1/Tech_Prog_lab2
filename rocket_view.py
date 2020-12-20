@@ -14,6 +14,10 @@ LABEL_R_TEXT = "Изменить вращение: rotation"
 CLOSING_PROTOCOL = "WM_DELETE_WINDOW"
 END_OF_LINE = "\n"
 KEY_RETURN = "<Return>"
+LEFT_ARROW = "<Left>"
+RIGHT_ARROW = "<Right>"
+UP_ARROW = "<Up>"
+DOWN_ARROW = "<Down>"
 TEXT_STATE_DISABLED = "disabled"
 TEXT_STATE_NORMAL = "normal"
 
@@ -81,6 +85,11 @@ class RocketUI():
 
         self.right_frame = tkinter.Frame(self.gui)
 
+        self.right_frame.bind(LEFT_ARROW, self.decrease_speed_val_X)
+        self.right_frame.bind(RIGHT_ARROW, self.increase_speed_val_X)
+        self.right_frame.bind(UP_ARROW, self.increase_speed_val_Y)
+        self.right_frame.bind(DOWN_ARROW, self.decrease_speed_val_Y)
+
         # chat
         self.frame = tkinter.Frame(self.right_frame)
         self.scrollbar = tkinter.Scrollbar(self.frame)
@@ -91,11 +100,33 @@ class RocketUI():
         self.frame.pack()
         self.input_field = tkinter.Entry(self.right_frame, textvariable=self.message, width=100)
         self.input_field.pack()
-        # self.input_field.bind(KEY_RETURN, self.application.send)
+        self.input_field.bind(KEY_RETURN, self.application.send)
         self.send_msg_btn = tkinter.Button(self.right_frame, text=messages.SEND, command=self.application.send)
         self.send_msg_btn.pack()
 
         self.right_frame.grid(column=2, row=0, columnspan=2, rowspan=6)
+
+    def get_speed(self):
+        sended_speed = dict()
+        for param in parametr.XYR:
+            sended_speed[param] = self.speed[param].get()
+        return sended_speed
+
+    def increase_speed_val_X(self):
+        val = self.speed[parametr.X].get()
+        self.speed[parametr.X].set(val + 1)
+
+    def decrease_speed_val_X(self):
+        val = self.speed[parametr.X].get()
+        self.speed[parametr.X].set(val - 1)
+
+    def increase_speed_val_Y(self):
+        val = self.speed[parametr.X].get()
+        self.speed[parametr.X].set(val + 1)
+
+    def decrease_speed_val_Y(self):
+        val = self.speed[parametr.Y].get()
+        self.speed[parametr.X].set(val - 1)
 
     def input_dialogs(self):
         self.gui.lower()

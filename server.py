@@ -72,8 +72,56 @@ class Server(object):
                 self.clients.add(client)
                 threading.Thread(target=self.handle, args=(client,)).start()
 
+
+    def get_change_speed(self):
+        change_speed_on_server_on = dict()
+        for param in parametr.XYR:
+            if self.change_of_speed[param] != 0:
+                if abs(self.change_of_speed[param]) > parametr.CHANGE_SPEED_PER_UPDATE[param]:
+                    cond_int = int(self.change_of_speed[param] > 0)
+                    add = parametr.CHANGE_SPEED_PER_UPDATE[param] * (-1) ** cond_int
+                    self.change_of_speed[param] = self.change_of_speed[param] + add
+                    change_speed_on_server_on[param] = -add
+                else:
+                    change_speed_on_server_on[param] = self.change_of_speed[param]
+                    self.change_of_speed[param] = 0
+            else:
+                change_speed_on_server_on[param] = 0
+        return change_speed_on_server_on
+
+    def update_speed_and_pos(self):
+
+        print("rocket pos old ", self.rocket_pos)
+        for i, param in enumerate(parametr.XY):
+            self.rocket_pos[i] += self.speed[param]
+
+        print("rocket pos new ", self.rocket_pos)
+        print("rocket sped old ", self.speed)
+        change_speed_on_server_on = self.get_change_speed()
+        for param in parametr.XYR:
+            self.speed[param] += change_speed_on_server_on[param]
+            change_speed_on_server_on[param] = 0
+            print("rocket sped new", self.speed, "\n\n")
+
+
+    def timer_update_param(self):
+        while True:
+            self.timer_tic += 1
+            self.update_speed_and_pos()
+            self.end_of_game = self.is_win()
+            if not self.end_of_game:
+                if self.timer_tic >= parametr.SEND_EVERY_N_TIMER_TIC:
+                    self.timer_tic = 0
+                    message = model.Message(username=messages.USERNAME_SERVER, rocket_pos=self.rocket_pos,
+                                            rocket_speed=self.speed, Lagrange_pos=self.L1)
+                    self.ground_client.sendall(message.marshal())
+                time.sleep(parametr.TIME_TO_UPDATE_SPEED_ML / 1000)
+            else:
+                message = model.Message(username="Voice", message="YOU WON", quit=False)
+                self.broadcast(message)
+
     def handle_rocket_msg(self, message: model.Message):
-        if message.message is not None:
+        if message.message != "":
             self.broadcast(message)
         if message.rocket_speed is not None:
             for param in parametr.XYR:
@@ -91,51 +139,6 @@ class Server(object):
                     ans = False
                     break
         return ans
-
-    def get_change_speed(self):
-        change_speed_on_server_on = dict()
-        for param in parametr.XYR:
-            if self.change_of_speed[param] != 0:
-                if abs(self.change_of_speed[param]) > parametr.CHANGE_SPEED_PER_UPDATE[param]:
-                    cond_int = int(self.change_of_speed[param] > 0)
-                    add = parametr.CHANGE_SPEED_PER_UPDATE[param] * (-1) ** cond_int
-                    self.change_of_speed[param] = self.change_of_speed[param] + add
-                    change_speed_on_server_on[param] = add
-                else:
-                    change_speed_on_server_on[param] = self.change_of_speed[param]
-                    self.change_of_speed[param] = 0
-            else:
-                change_speed_on_server_on[param] = 0
-        return change_speed_on_server_on
-
-    def update_speed_and_pos(self):
-
-        print("rocket pos old ", self.rocket_pos)
-        for i, param in enumerate(parametr.XY):
-            self.rocket_pos[i] += (parametr.TIME_TO_UPDATE_SPEED_ML * self.speed[param]) // 1000
-
-        print("rocket pos new ", self.rocket_pos)
-        print("rocket sped old ", self.speed)
-        change_speed_on_server_on = self.get_change_speed()
-        for param in parametr.XYR:
-            self.speed[param] += (parametr.TIME_TO_UPDATE_SPEED_ML * change_speed_on_server_on[param]) // 1000
-            print("rocket sped new", self.speed)
-
-    def timer_update_param(self):
-        while True:
-            self.timer_tic += 1
-            self.update_speed_and_pos()
-            self.end_of_game = self.is_win()
-            if not self.end_of_game:
-                if self.timer_tic >= parametr.SEND_EVERY_N_TIMER_TIC:
-                    self.timer_tic = 0
-                    message = model.Message(username=messages.USERNAME_SERVER, rocket_pos=self.rocket_pos,
-                                            rocket_speed=self.speed, Lagrange_pos=self.L1)
-                    self.ground_client.sendall(message.marshal())
-                time.sleep(parametr.TIME_TO_UPDATE_SPEED_ML / 1000)
-            else:
-                message = model.Message(username="Voice", message="YOU WON", quit=False)
-                self.broadcast(message)
 
     def handle(self, client):
         while True:
@@ -193,7 +196,6 @@ class Server(object):
         self.sock.close()
         for client in self.clients:
             client.close()
-        self.timer_thread.close()
         print(CLOSING)
 
 

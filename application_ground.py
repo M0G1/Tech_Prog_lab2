@@ -71,10 +71,11 @@ class Application(object):
         if len(message) == 0:
             return
         self.ui.message.set("")
-        message = model.Message(username=self.username, message=message, quit=False)
+        return model.Message(username=self.username, message=message, quit=False)
 
     def send(self, event=None):
         message = self.get_message()
+        print(message)
         if message is None:
             return
         try:
