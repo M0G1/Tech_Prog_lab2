@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import sys
-import application
+import application_ground
 
 
 def main(args):
-    app = application.Application(args)
+    app = application_ground.Application(args)
     app.execute()
 
 

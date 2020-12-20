@@ -34,6 +34,7 @@ class Application(object):
         except (socket.error, OverflowError):
             self.r_ui.alert(messages.ERROR, messages.CONNECTION_ERROR)
             return
+
         self.receive_worker = threading.Thread(target=self.receive)
         self.receive_worker.start()
         self.r_ui.loop()
@@ -78,7 +79,7 @@ class Application(object):
         if all([speed[param] == 0 for param in parametr.XYR]):
             return
 
-        return model.Message(username=self.username, speed=speed, quit=False)
+        return model.Message(username=self.username, speed=speed, message="",quit=False)
 
     def send_speed(self, event=None):
         message = self.get_speed_to_send()

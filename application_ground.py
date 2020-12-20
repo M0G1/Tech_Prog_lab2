@@ -36,10 +36,19 @@ class Application(object):
         except (socket.error, OverflowError):
             self.ui.alert(messages.ERROR, messages.CONNECTION_ERROR)
             return
+        # send to server msg to say self type
+        message = model.Message(username=self.username, quit=False, message="")
+        try:
+            temp_test = message.marshal()
+            print(temp_test)
+            self.sock.sendall(temp_test)
+        except (ConnectionAbortedError, ConnectionResetError):
+            if not self.closing:
+                self.ui.alert(messages.ERROR, messages.CONNECTION_ERROR)
+
         self.receive_worker = threading.Thread(target=self.receive)
         self.receive_worker.start()
         self.ui.loop()
-
 
     def receive(self):
         while True:
@@ -49,7 +58,7 @@ class Application(object):
                 if not self.closing:
                     self.ui.alert(messages.ERROR, messages.CONNECTION_ERROR)
                 return
-            self.ui.show_message(message)
+            self.ui.show_speed_or_message(message)
 
     def receive_all(self):
         buffer = ""
@@ -63,7 +72,6 @@ class Application(object):
             return
         self.ui.message.set("")
         message = model.Message(username=self.username, message=message, quit=False)
-
 
     def send(self, event=None):
         message = self.get_message()

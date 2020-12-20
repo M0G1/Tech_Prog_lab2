@@ -35,7 +35,7 @@ class GroundUI():
         self.gui.title(messages.TITLE)
         self.fill_frame()
         self.gui.protocol(CLOSING_PROTOCOL, self.on_closing)
-        # return self.input_dialogs()
+        return self.input_dialogs()
 
     def fill_frame(self):
 
@@ -77,7 +77,7 @@ class GroundUI():
         self.input_field = tkinter.Entry(self.gui, textvariable=self.message, width=100)
         self.input_field.grid(column=2, row=5, columnspan=2)
         # self.input_field.bind(KEY_RETURN, self.application.send)
-        self.send_button = tkinter.Button(self.gui, text=messages.SEND)  # , command=self.application.send)
+        self.send_button = tkinter.Button(self.gui, text=messages.SEND , command=self.application.send)
         self.send_button.grid(column=2, row=6, columnspan=2)
 
     def input_dialogs(self):
@@ -115,7 +115,7 @@ class GroundUI():
         self.gui.mainloop()
 
     def on_closing(self):
-        # self.application.exit()
+        self.application.exit()
         self.gui.destroy()
 
 

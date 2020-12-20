@@ -41,7 +41,7 @@ class RocketUI():
         self.gui.title(messages.TITLE)
         self.fill_frame()
         self.gui.protocol(CLOSING_PROTOCOL, self.on_closing)
-        # return self.input_dialogs()
+        return self.input_dialogs()
 
     def fill_frame(self):
 
@@ -72,7 +72,7 @@ class RocketUI():
         # Buttons
         btn = tkinter.Button(self.left_frame, text="Сбросить значения", command=self.reset_values)
         self.send_speed_btn = tkinter.Button(self.left_frame,
-                                             text="Изменить скорость")  # , command=self.application.send_speed)
+                                             text="Изменить скорость", command=self.application.send_speed)
         # self.send_speed_btn.bind(KEY_RETURN, self.application.send)
         btn.grid(column=0, row=5, columnspan=2)
         self.send_speed_btn.grid(column=0, row=6, columnspan=2)
@@ -92,14 +92,10 @@ class RocketUI():
         self.input_field = tkinter.Entry(self.right_frame, textvariable=self.message, width=100)
         self.input_field.pack()
         # self.input_field.bind(KEY_RETURN, self.application.send)
-        self.send_msg_btn = tkinter.Button(self.right_frame, text=messages.SEND)  # , command=self.application.send)
+        self.send_msg_btn = tkinter.Button(self.right_frame, text=messages.SEND, command=self.application.send)
         self.send_msg_btn.pack()
 
         self.right_frame.grid(column=2, row=0, columnspan=2, rowspan=6)
-
-    def rand_speed(self):
-        for param in parametr.XYR:
-            self.speed[param] = random.randint(parametr.MIN_SPEED[param] // 2, parametr.MAX_SPEED[param] // 2)
 
     def input_dialogs(self):
         self.gui.lower()
@@ -122,21 +118,6 @@ class RocketUI():
         self.message_list.insert(tkinter.END, str(message) + END_OF_LINE)
         self.message_list.configure(state=TEXT_STATE_DISABLED)
 
-    def get_speed(self):
-        change_speed_on_server_on = dict()
-        for param in parametr.XYR:
-            if self.speed[param] != 0:
-                if abs(self.speed[param]) > parametr.CHANGE_SPEED_PER_UPDATE[param]:
-                    cond_int = int(self.speed[param] > 0)
-                    add = parametr.CHANGE_SPEED_PER_UPDATE[param] * (-1) ** cond_int
-                    self.speed[param] = self.speed[param] + add
-                    change_speed_on_server_on[param] = add
-                else:
-                    change_speed_on_server_on[param] = - self.speed[param]
-                    self.speed[param] = 0
-
-        return change_speed_on_server_on
-
     def loop(self):
         self.gui.mainloop()
 
@@ -146,7 +127,7 @@ class RocketUI():
         self.speed[parametr.R].set(0)
 
     def on_closing(self):
-        # self.application.exit()
+        self.application.exit()
         self.gui.destroy()
 
 

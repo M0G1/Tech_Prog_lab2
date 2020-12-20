@@ -11,7 +11,7 @@ TARGET_ENCODING = "utf-8"
 class Message(object):
 
     def __init__(self, **kwargs):
-        self.player_code = None  # player type
+        self.username = None
         self.message = None
         self.is_game_data = None  # or is it a chat data
         self.is_win = None
