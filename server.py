@@ -122,6 +122,7 @@ class Server(object):
 
     def handle_rocket_msg(self, message: model.Message):
         if message.message != "":
+            time.sleep(parametr.MESSAGE_DELAY_SEC)
             self.broadcast(message)
         if message.rocket_speed is not None:
             for param in parametr.XYR:
