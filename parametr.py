@@ -37,3 +37,7 @@ MAX_VAL_GEN_POS[Y] = 30
 
 MIN_VAL_GEN_POS[X] = -30
 MIN_VAL_GEN_POS[Y] = -30
+
+JSON_FILENAME = "state.json"
+SAVE_STATE = "save state"
+LOAD_STATE = "load state"

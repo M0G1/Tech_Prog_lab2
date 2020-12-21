@@ -13,10 +13,10 @@ class Message(object):
     def __init__(self, **kwargs):
         self.username = None
         self.message = None
-        self.is_game_data = None  # or is it a chat data
         self.rocket_pos = None
         self.Lagrange_pos = None
         self.rocket_speed = None
+        self.save_load_state = None
         self.quit = False
         self.__dict__.update(kwargs)
 

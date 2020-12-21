@@ -85,16 +85,22 @@ class Application(object):
         message = self.get_speed_to_send()
         if message is None:
             return
-        try:
-            temp_test = message.marshal()
-            print(temp_test)
-            self.sock.sendall(temp_test)
-        except (ConnectionAbortedError, ConnectionResetError):
-            if not self.closing:
-                self.r_ui.alert(messages.ERROR, messages.CONNECTION_ERROR)
         # print message into message list
         msg_to_pilot = "Command of changing speed [on X: %d, on Y: %d, rotation on %d] accepted" % (
             message.get_speed_list_XYR())
+        msg_tuple = (
+            message,
+            model.Message(username=messages.USERNAME_ROCKET_INNER_MSG, message=msg_to_pilot, quit=False)
+        )
+        for i in range(len(msg_tuple)):
+            try:
+                temp_test = message.marshal()
+                print(temp_test)
+                self.sock.sendall(temp_test)
+            except (ConnectionAbortedError, ConnectionResetError):
+                if not self.closing:
+                    self.r_ui.alert(messages.ERROR, messages.CONNECTION_ERROR)
+
         self.r_ui.show_message(msg_to_pilot)
 
     def exit(self):
