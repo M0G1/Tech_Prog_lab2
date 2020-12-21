@@ -14,7 +14,6 @@ class Message(object):
         self.username = None
         self.message = None
         self.is_game_data = None  # or is it a chat data
-        self.is_win = None
         self.rocket_pos = None
         self.Lagrange_pos = None
         self.rocket_speed = None

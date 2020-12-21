@@ -36,6 +36,7 @@ class Server(object):
         self.timer_tic = parametr.SEND_EVERY_N_TIMER_TIC
         self.ground_client = None
 
+        self.end_of_game = False
         self.change_of_speed = dict()
         self.speed = dict()
         self.rocket_pos = None
@@ -119,6 +120,7 @@ class Server(object):
             else:
                 message = model.Message(username="Voice", message="YOU WON", quit=False)
                 self.broadcast(message)
+                break
 
     def handle_rocket_msg(self, message: model.Message):
         if message.message != "":
