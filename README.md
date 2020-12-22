@@ -1,5 +1,5 @@
 № Лабораторная работа № 3
-# Tech_Prog_lab2
+# Tech_Prog_lab2_3
 client serser application, using json to transfer data, to save and to load state.
 ## Вариант 8
 * Почта  - myslim2000@ya.ru
