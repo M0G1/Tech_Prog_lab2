@@ -73,6 +73,13 @@ class RocketUI():
             self.input_fields[param].grid(column=1, row=(2 + index))
         self.reset_values()
 
+        # Menu
+        menubar = tkinter.Menu(self.gui)
+        menu = tkinter.Menu(menubar, tearoff=0)
+        menu.add_command(label="Сохранить", command=self.application.send_save_state)
+        menu.add_command(label="Загрузить", command=self.application.send_load_state)
+        menubar.add_cascade(label="Игра", menu=menu)
+
         # Buttons
         btn = tkinter.Button(self.left_frame, text="Сбросить значения", command=self.reset_values)
         self.send_speed_btn = tkinter.Button(self.left_frame,
@@ -105,6 +112,8 @@ class RocketUI():
         self.send_msg_btn.pack()
 
         self.right_frame.grid(column=2, row=0, columnspan=2, rowspan=6)
+
+        self.gui.config(menu=menubar)
 
     def get_speed(self):
         sended_speed = dict()

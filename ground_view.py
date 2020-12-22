@@ -64,6 +64,14 @@ class GroundUI():
             self.speed_label[param] = tkinter.Label(self.left_frame, text=param)
             self.speed_label[param].grid(column=1, row=(2 + index))
 
+        # Menu
+        menubar = tkinter.Menu(self.gui)
+        menu = tkinter.Menu(menubar, tearoff=0)
+        menu.add_command(label="Сохранить", command=self.application.send_save_state)
+        menu.add_command(label="Загрузить", command=self.application.send_load_state)
+        menubar.add_cascade(label="Игра", menu=menu)
+
+
         self.left_frame.grid(column=0, row=0, columnspan=2, rowspan=8)
 
         # chat
@@ -80,6 +88,8 @@ class GroundUI():
         self.send_button = tkinter.Button(self.gui, text=messages.SEND, command=self.application.send)
         self.send_button.grid(column=2, row=6, columnspan=2)
 
+        self.gui.config(menu=menubar)
+
     def input_dialogs(self):
         self.gui.lower()
         self.application.host = simpledialog.askstring(messages.SERVER_HOST, messages.INPUT_SERVER_HOST,
@@ -91,6 +101,7 @@ class GroundUI():
         if self.application.port is None:
             return False
         return True
+
 
     def alert(self, title, message):
         messagebox.showerror(title, message)

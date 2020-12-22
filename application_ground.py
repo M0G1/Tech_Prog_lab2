@@ -2,10 +2,13 @@
 import json
 import socket
 import threading
+from tkinter import messagebox
 
 import messages
 import model
+import parametr
 from ground_view import GroundUI
+
 
 BUFFER_SIZE = 2 ** 10
 
@@ -50,6 +53,27 @@ class Application(object):
         self.receive_worker.start()
         self.ui.loop()
 
+    # ============================= Save and Load State ================================================
+    def send_load_state(self):
+        if messagebox.askokcancel(messages.USERNAME_VOICE,messages.IS_LOAD_STATE_QUESTION):
+            self.send_load_save_msg(parametr.LOAD_STATE)
+
+    def send_save_state(self):
+        if messagebox.askokcancel(messages.USERNAME_VOICE,messages.IS_SAVE_STATE_QUESTION):
+            self.send_load_save_msg(parametr.SAVE_STATE)
+
+    def send_load_save_msg(self, load_save_param: str):
+        message = model.Message(username=messages.USERNAME_ROCKET, save_load_state=load_save_param, message="",
+                                quit=False)
+        try:
+            temp_test = message.marshal()
+            print(temp_test)
+            self.sock.sendall(temp_test)
+        except (ConnectionAbortedError, ConnectionResetError):
+            if not self.closing:
+                self.ui.alert(messages.ERROR, messages.CONNECTION_ERROR)
+
+    # ====================== receive from server methods ================================================
     def receive(self):
         while True:
             try:
@@ -66,6 +90,7 @@ class Application(object):
             buffer += self.sock.recv(BUFFER_SIZE).decode(model.TARGET_ENCODING)
         return buffer[:-1]
 
+    # ====================== Send some msg to server methods ============================================
     def get_message(self):
         message = self.ui.message.get()
         if len(message) == 0:

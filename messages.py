@@ -15,6 +15,8 @@ SERVER_PORT = "Server Port"
 TITLE = ""
 USERNAME = "Username"
 INPUT_USERNAME = "INPUT USERNAME"
+IS_SAVE_STATE_QUESTION = "Вы точно хотите сохранить игру? Ваша текущая игра остановится, включая чат!"
+IS_LOAD_STATE_QUESTION = "Вы точно хотите загрузить игру? Ваши текущие действия не сохраняться!"
 
 GROUND_COMMAND_CENTER_CODE = 1
 SPACE_ROCKET_CODE = 0

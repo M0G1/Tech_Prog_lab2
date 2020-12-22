@@ -6,7 +6,7 @@ import threading
 import time
 import random
 
-from jsonschema import validate, Draft4Validator
+import jsonschema
 
 import state_schema_json
 import model
@@ -64,12 +64,17 @@ class Server(object):
                 random.randint(parametr.MIN_VAL_GEN_POS[param], parametr.MAX_VAL_GEN_POS[param])
             )
 
-    def save_state_to_file(self, stat: state.State):
-        if (Draft4Validator(state_schema_json.schema).is_valid(stat)):
+    # ============================ Save Load State(Game) ============================================
+    def save_state_to_file(self, stat: state.State) -> bool:
+        try:
+            jsonschema.validate(stat.__dict__, state_schema_json.schema)
             with open(parametr.JSON_FILENAME, "w") as file:
-                json.dump(stat, file, indent=4)
-        else:
+                json.dump(stat.__dict__, file)
+            return True
+        except jsonschema.ValidationError as err:
             print("The message doesn't match the schema")
+            print(err)
+            return False
 
     def load_state_from_file(self):
         stat = None
@@ -78,30 +83,20 @@ class Server(object):
                 file_content = file.read().strip()
                 if len(file_content):
                     stat = state.State(**json.loads(file_content))
+                    jsonschema.validate(stat.__dict__, state_schema_json.schema)
         except FileNotFoundError:
             print("File didn't found")
             return None
-        except json.JSONDecodeError:  # Некорректное содержимое файла
+        except json.JSONDecodeError:
+            return None
+        except jsonschema.ValidationError as err:
+            print("The message doesn't match the schema")
+            print(err)
             return None
 
-        if not Draft4Validator(state_schema_json.schema).is_valid(stat):
-            print("State doesn't math the schema")
-            stat = None
         return stat
 
-    def listen(self):
-        self.sock.listen(2)
-        while len(self.clients) < 2:
-            try:
-                client, address = self.sock.accept()
-                print("Client connect")
-            except OSError:
-                print(CONNECTION_ABORTED)
-                return
-            print(CONNECTED_PATTERN.format(*address))
-            self.clients.add(client)
-            threading.Thread(target=self.handle, args=(client,)).start()
-
+    # ================================== Work of inner timer ==========================================
     def get_change_speed(self):
         change_speed_on_server_on = dict()
         for param in parametr.XYR:
@@ -132,6 +127,23 @@ class Server(object):
             change_speed_on_server_on[param] = 0
             print("rocket sped new", self.speed, "\n\n")
 
+    def start_timer_program(self):
+        self.timer_thread = threading.Thread(target=self.timer_update_param)
+        self.timer_thread.start()
+
+    def is_win(self):
+        ans = True
+        for i in range(parametr.DIMENSION):
+            if self.rocket_pos[i] != self.L1[i]:
+                ans = False
+                break
+        if ans:
+            for param in parametr.XYR:
+                if self.speed[param] != 0:
+                    ans = False
+                    break
+        return ans
+
     def timer_update_param(self):
         while not self.is_save_load_state:
             self.timer_tic += 1
@@ -149,6 +161,7 @@ class Server(object):
                 self.broadcast(message)
                 break
 
+    # =========================== Message handling =====================================================
     def handle_rocket_msg(self, message: model.Message):
         if message.message != "":
             time.sleep(parametr.MESSAGE_DELAY_SEC)
@@ -156,19 +169,6 @@ class Server(object):
         if message.rocket_speed is not None:
             for param in parametr.XYR:
                 self.change_of_speed[param] += message.rocket_speed[param]
-
-    def is_win(self):
-        ans = True
-        for i in range(parametr.DIMENSION):
-            if self.rocket_pos[i] != self.L1[i]:
-                ans = False
-                break
-        if ans:
-            for param in parametr.XYR:
-                if self.speed[param] != 0:
-                    ans = False
-                    break
-        return ans
 
     def handle_save_load_state(self, message: model.Message):
         answer_msg = ""
@@ -181,16 +181,19 @@ class Server(object):
                 self.L1 = stat.L1
                 answer_msg = f"State of game have loaded by {message.username}"
             else:
-                answer_msg = "Could not to load latest state of game"
+                answer_msg = "Could not to load latest state of game. Start current game."
         elif message.save_load_state == parametr.SAVE_STATE:
             stat = state.State()
             stat.speed = self.speed
             stat.rocket_pos = self.rocket_pos
             stat.change_of_speed = self.change_of_speed
             stat.L1 = self.L1
-            self.save_state_to_file(stat)
-            answer_msg = f"State of game have saved by {message.username}"
-
+            if self.save_state_to_file(stat):
+                answer_msg = f"State of game have saved by {message.username}"
+            else:
+                answer_msg = "Some went wrong"
+        self.is_save_load_state = False
+        self.start_timer_program()
         msg = model.Message(username=messages.USERNAME_VOICE, message=answer_msg, quit=False)
         self.broadcast(msg)
 
@@ -221,8 +224,7 @@ class Server(object):
                 elif message.username == messages.USERNAME_GROUND:
                     if self.ground_client is None:
                         self.ground_client = client
-                        self.timer_thread = threading.Thread(target=self.timer_update_param)
-                        self.timer_thread.start()
+                        self.start_timer_program()
                     else:
                         time.sleep(parametr.MESSAGE_DELAY_SEC)
                         self.broadcast(message)
@@ -236,6 +238,20 @@ class Server(object):
         while not buffer.endswith(model.END_CHARACTER):
             buffer += client.recv(BUFFER_SIZE).decode(model.TARGET_ENCODING)
         return buffer[:-1]
+
+    # ===================== Server connection and start =====================================
+    def listen(self):
+        self.sock.listen(2)
+        while len(self.clients) < 2:
+            try:
+                client, address = self.sock.accept()
+                print("Client connect")
+            except OSError:
+                print(CONNECTION_ABORTED)
+                return
+            print(CONNECTED_PATTERN.format(*address))
+            self.clients.add(client)
+            threading.Thread(target=self.handle, args=(client,)).start()
 
     def run(self):
         print(RUNNING)

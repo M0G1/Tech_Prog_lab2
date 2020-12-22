@@ -17,3 +17,7 @@ class State(object):
 
     def __str__(self):
         return MESSAGE_PATTERN.format(**self.__dict__)
+
+    def marshal(self):
+        return (json.dumps(self.__dict__) + END_CHARACTER).encode(TARGET_ENCODING)
+
